@@ -915,7 +915,7 @@
                 <li><a href="#" onclick="showIA()">IA</a></li>
                 <li><a href="#" onclick="showAbout()">About</a></li>
                 <li id="authButtons">
-                    <button class="btn-outline login-btn" id="loginBtn" onclick="toggleLogin()">
+                    <button class="btn-outline login-btn" id="loginBtn" onclick="openLogin()">
                         <i class="fas fa-right-to-bracket"></i> <span id="loginText">Login</span>
                     </button>
                     <button class="btn-primary signup-btn" id="signupBtn" onclick="showSignup()">
@@ -929,7 +929,7 @@
                         </button>
                         <div class="user-dropdown-content" id="userDropdownContent">
                             <a href="#" onclick="showAdminDashboard()"><i class="fas fa-gauge"></i> Dashboard</a>
-                            <a href="#" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Logout</a>
+                            <a href="#" onclick="handleLogout()"><i class="fas fa-right-from-bracket"></i> Logout</a>
                         </div>
                     </div>
                 </li>
@@ -1009,7 +1009,10 @@
                 <p>Explore our comprehensive collection of medical notes organized by specialty</p>
             </div>
 
-            <div class="categories" id="dynamicHomeCategories"></div>
+            <div class="categories" id="dynamicHomeCategories">
+                <div id="subcategoriesGrid"></div>
+            </div>
+
 
         <!-- Category Page -->
         <div id="categoryPage" class="page hidden">
@@ -1143,9 +1146,6 @@
                         <label class="form-label" for="noteFormCategory">Category</label>
                         <select class="form-select" id="noteFormCategory" required>
                             <option value="">Select Category</option>
-                            <option value="Medical">Medical</option>
-                            <option value="Surgical">Surgical</option>
-                            <option value="Specialty">Specialty</option>
                         </select>
                     </div>
 
@@ -1254,7 +1254,7 @@
                     </div>
                     <h2>AI Medical Assistant</h2>
                     <p>Get instant answers to medical questions, drug interactions, differential diagnoses, and more.</p>
-                    <p style="color: var(--text-light); margin-top: 2rem;">This feature will be available in the next update.</p>
+                    <p style="color: var(--text-light); margin-top: 2rem;">This feature will be available soon! </p>
                 </div>
             </div>
         </div>
@@ -1287,7 +1287,7 @@ Our mission is to take every topic — from core mechanisms to real-world decisi
                     </ul>
 
                     <h3 style="margin-top: 2rem;">Contact Information</h3>
-                    <p>For questions, feedback, or collaboration opportunities, please contact us at: <strong>imenemazouz05@gmail.com</strong></p>
+                    <p>For questions or feedback, please contact us at: <strong>contact@clincalroot.co.uk</strong></p>
                 </div>
             </div>
         </div>
@@ -1382,6 +1382,30 @@ Our mission is to take every topic — from core mechanisms to real-world decisi
             </div>
         </div>
     </div>
-    <script src="main.js"></script>
+    <script>
+async function showCategory(nameOrId) {
+    if (typeof openCategoryById === "function") {
+        const res = await fetch("/api/categories/tree");
+        const tree = await res.json();
+
+        function search(nodes, target) {
+            for (const n of nodes) {
+                if (n.name.toLowerCase() === target.toLowerCase()) return n;
+                if (n.children) {
+                    const found = search(n.children, target);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        const match = search(tree, nameOrId);
+        if (match) return openCategoryById(match.id);
+    }
+
+    console.warn("Category not found:", nameOrId);
+}
+</script>
+
 </body>
 </html>
