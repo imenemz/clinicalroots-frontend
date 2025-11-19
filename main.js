@@ -131,6 +131,38 @@ function showLibrary(){ switchView('library'); fetchAndRenderTopCategories(); }
 function showAdminDashboard(){ if(!currentUser) return alert('Admin only'); switchView('admin'); fetchAdminStats(); fetchTopNotes(); }
 function showAddNotePage(){ switchView('addNote'); populateNoteCategorySelect(); }
 
+// ---------- Open category by name or ID (used by homepage Medical/Surgical/Specialty buttons) ----------
+async function showCategory(nameOrId) {
+    await fetchCategoriesTree();  // ensure tree is loaded
+
+    function search(nodes, target) {
+        target = String(target).toLowerCase();
+        for (const n of nodes) {
+            if (n.name.toLowerCase() === target) return n;
+            if (n.children && n.children.length) {
+                const found = search(n.children, target);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    // If argument is ID (number)
+    if (!isNaN(Number(nameOrId))) {
+        return openCategoryById(Number(nameOrId));
+    }
+
+    // If argument is name
+    const match = search(categoriesTree, nameOrId);
+    if (!match) {
+        console.warn("Category not found:", nameOrId);
+        return;
+    }
+
+    openCategoryById(match.id);
+}
+
+
 // ---------- Category fetch + render ----------
 async function fetchCategoriesTree(){
     const tree = await api('/api/categories/tree');
